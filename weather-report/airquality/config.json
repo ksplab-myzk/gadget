@@ -1,0 +1,12 @@
+{
+    "api_key": "9374cbd85e6aa5d3605d3e659ba39a28",
+    "open_uv_api_key": "openuv-dvbvqrmsq0hm2i-io", 
+    "lat": 35.5895,
+    "lon": 139.6280,
+    "city": "Kawasaki,jp",
+
+    "update_interval": 300,
+    "hours": 8,
+    "update_interval_uv": 3600
+}
+

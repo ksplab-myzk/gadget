@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+weather-report/logs/
+*.log
+
+# contents
+weather-report/org_icons/
+weather-report/temp/
+weather-report/output/
