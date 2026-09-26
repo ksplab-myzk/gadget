@@ -1,0 +1,9 @@
+{
+    "region": "tokyo",
+    "co2_factor_kg_per_kwh": 0.457,
+    "radiation_station_code": "90133785",
+    "radiation_station": "横浜市 県立岸根高等学校",
+    "update_interval": 300,
+    "output_path": "output/power_forecast.png",
+    "temp_path": "temp/power_forecast_temp.png"
+}

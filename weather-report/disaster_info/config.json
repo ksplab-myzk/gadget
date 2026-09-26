@@ -1,0 +1,11 @@
+{
+    "area_code": "140000",
+    "area_name": "神奈川県・川崎周辺",
+    "river_name": "多摩川",
+    "river_station_code": "8300000346",
+    "river_station_ofc_code": "83000",
+    "river_station_name": "多摩川右岸20.2K",
+    "update_interval": 300,
+    "output_path": "output/disaster_info.png",
+    "temp_path": "temp/disaster_info_temp.png"
+}
