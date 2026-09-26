@@ -8,12 +8,13 @@ from datetime import datetime
 # -----------------------------
 # 設定
 # -----------------------------
-OUTPUT_PATH = "output/weather.png"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_PATH = os.path.join(BASE_DIR, "output", "weather.png")
 API_KEY = "9374cbd85e6aa5d3605d3e659ba39a28"
 CITY = "Kawasaki,jp"
 
-FONT_PATH = "fonts/NotoSansJP-Regular.ttf"
-ICON_DIR = "icons"   # ← 240pxアイコン推奨
+FONT_PATH = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Regular.ttf")
+ICON_DIR = os.path.join(BASE_DIR, "icons")   # ← 240pxアイコン推奨
 
 CARD_W = 1080
 CARD_H = 400

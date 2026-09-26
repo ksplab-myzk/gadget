@@ -9,9 +9,12 @@ import requests
 CARD_W = 1080
 CARD_H = 400
 
-CONFIG_PATH = "airquality/config.json"
-OUTPUT_PATH = "output/airquality.png"
-TEMP_PATH = "temp/airquality_temp.png"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+CONFIG_PATH = os.path.join(BASE_DIR, "airquality", "config.json")
+OUTPUT_PATH = os.path.join(BASE_DIR, "output", "airquality.png")
+TEMP_PATH = os.path.join(BASE_DIR, "airquality", "airquality_temp.png")
+FONT_PATH = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Regular.ttf")
 
 def load_config():
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
@@ -203,16 +206,16 @@ def draw_header(card, timestamp):
     header = pygame.Surface((1080, 60), pygame.SRCALPHA)
     pygame.draw.rect(header, (0,0,0,120), (0,0,1080,60), border_radius=16)
 
-    font = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 40)
+    font = pygame.font.Font(FONT_PATH, 40)
     title = font.render("気温・降水確率", True, (255,255,255))
     card.blit(title, (40, 8))
 
-    font = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 24)
+    font = pygame.font.Font(FONT_PATH, 24)
     info = timestamp.strftime("%Y年%m月%d日 %H:%M 時点")
     info_txt = font.render(info, True, (255,255,255))
     card.blit(info_txt, (1080 - info_txt.get_width() - 40, 8))
 
-    src = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 16).render("Provided by：OpenWeather・OpenUV・気象庁", True, (255,255,255))
+    src = pygame.font.Font(FONT_PATH, 16).render("Provided by：OpenWeather・OpenUV・気象庁", True, (255,255,255))
     card.blit(src, (1080 - src.get_width() - 40, 45))
 
 def draw_temp_precip_graph(card, hourly, pop_hourly):
@@ -233,7 +236,7 @@ def draw_temp_precip_graph(card, hourly, pop_hourly):
         x = int(i * step_x + step_x / 2 - 20)
         pygame.draw.rect(graph, (80,120,255,190), (x, 240 - bar_h, 40, bar_h))
 
-        font_small = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 20)
+        font_small = pygame.font.Font(FONT_PATH, 20)
         pop_v = pop*100
         pop_text = font_small.render(f"{pop_v}%", True, (200,200,200))
         card.blit(pop_text, (x , 80))
@@ -246,7 +249,7 @@ def draw_temp_precip_graph(card, hourly, pop_hourly):
         y = int(240 - ratio * 200)
         points.append((x, y))
 
-        font_small = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 20)
+        font_small = pygame.font.Font(FONT_PATH, 20)
         temp_text = font_small.render(f"{h['temp']:.1f}°", True, (255,255,255))
         card.blit(temp_text, (x -20, y +20))
 
@@ -259,7 +262,7 @@ def draw_temp_precip_graph(card, hourly, pop_hourly):
         pygame.draw.circle(graph, (255,255,255), (x, y), 8)
 
     # 時刻ラベル
-    font = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 20)
+    font = pygame.font.Font(FONT_PATH, 20)
     for i, h in enumerate(hourly):
         t = h["time"].strftime("%H時")
         txt = font.render(t, True, (255,255,255))
@@ -277,7 +280,7 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
     max_t = max(temps) + 2
 
     step_x = 1080 / len(hourly)
-    font_small = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 20)
+    font_small = pygame.font.Font(FONT_PATH, 20)
 
     # -----------------------------
     # 1. 降水確率（棒グラフ）
@@ -379,7 +382,7 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
     # -----------------------------
     # 4. 時刻ラベル
     # -----------------------------
-    font = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 20)
+    font = pygame.font.Font(FONT_PATH, 20)
     for i, h in enumerate(hourly):
         t = h["time"].strftime("%H時")
         txt = font.render(t, True, (255,255,255))
@@ -424,8 +427,8 @@ def draw_aqi_card(card, aqi_data):
     bg.set_alpha(180)
     card.blit(bg, (0, 320))
 
-    font_big = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 28)
-    font_small = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 24)
+    font_big = pygame.font.Font(FONT_PATH, 28)
+    font_small = pygame.font.Font(FONT_PATH, 24)
 
     text_color = get_text_color(hex_to_rgb(colors[aqi]))
     txt = font_big.render(f"空気質指数：{aqi}", True, text_color)
@@ -452,8 +455,8 @@ def draw_uv_card(card, uv_data):
     bg.set_alpha(180)
     card.blit(bg, (540, 320))
 
-    font_big = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 28)
-    font_small = pygame.font.Font("fonts/NotoSansJP-Regular.ttf", 24)
+    font_big = pygame.font.Font(FONT_PATH, 28)
+    font_small = pygame.font.Font(FONT_PATH, 24)
 
     text_color = get_text_color(hex_to_rgb(color))
 
@@ -504,7 +507,7 @@ def main():
 
     card = generate_weather_summary(data)
 
-    ok = safe_save(card, "temp/weather_summary_temp.png", "output/weather_summary.png")
+    ok = safe_save(card, TEMP_PATH, OUTPUT_PATH)
 
     if ok:
         log("weather_summary", "OK: Updated")

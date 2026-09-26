@@ -11,11 +11,14 @@ from common.utils import log, safe_save
 
 CARD_W = 1080
 CARD_H = 480
-CONFIG_PATH = "airquality/config.json"
-OUTPUT_PATH = "output/calendar_sun.png"
-TEMP_PATH = "temp/calendar_sun_temp.png"
-FONT_PATH = "fonts/NotoSansJP-Regular.ttf"
-ICON_DIR = "icons"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+CONFIG_PATH = os.path.join(BASE_DIR, "airquality", "config.json")
+OUTPUT_PATH = os.path.join(BASE_DIR, "output", "calendar_sun.png")
+TEMP_PATH = os.path.join(BASE_DIR, "airquality", "calendar_sun_temp.png")
+FONT_PATH = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Regular.ttf")
+ICON_DIR = os.path.join(BASE_DIR, "icons")
 
 
 def load_config():
