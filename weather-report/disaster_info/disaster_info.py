@@ -48,7 +48,7 @@ def fetch_warnings(area_code):
             for warning in area.get("warnings", []):
                 code = str(warning.get("code", ""))
                 status = warning.get("status", "")
-                if status not in ("解除", "", "発表なし"):
+                if code and status not in ("解除", "", "発表なし", "発表警報・注意報はなし"):
                     active.append(WARNING_NAMES.get(code, "注意報発表"))
     return sorted(set(active))
 
@@ -135,14 +135,20 @@ def draw_card(config, warnings, quake, river, errors):
     updated_surface = small_font.render(updated, True, (180, 194, 204))
     card.blit(updated_surface, (CARD_W - updated_surface.get_width() - 40, 42))
 
-    warning_lines = ["発表なし" if not warnings else "・".join(warnings)]
-    draw_panel(card, (40, 116, 490, 112), "気象警報・注意報", warning_lines, (239, 173, 80) if warnings else (100, 198, 170))
+    if warnings:
+        warning_lines = ["・".join(warnings)]
+    elif "警報" in errors:
+        warning_lines = ["情報取得不可"]
+    else:
+        warning_lines = ["警報・注意報発表なし"]
+    warning_color = (239, 173, 80) if warnings or "警報" in errors else (100, 198, 170)
+    draw_panel(card, (40, 116, 490, 132), "気象警報・注意報", warning_lines, warning_color)
 
     quake_lines = ["情報なし"] if not quake else [
         f"震源: {quake['area']}",
         f"M{quake['magnitude']} / 最大震度 {quake['max_intensity']} / {quake['time'][11:16]}",
     ]
-    draw_panel(card, (550, 116, 490, 112), "最新の地震", quake_lines, (236, 119, 108) if quake else (100, 198, 170))
+    draw_panel(card, (550, 116, 490, 132), "最新の地震", quake_lines, (236, 119, 108) if quake else (100, 198, 170))
 
     if not river:
         river_lines = ["データなし"]
@@ -154,10 +160,10 @@ def draw_card(config, warnings, quake, river, errors):
             f"観測: {river['time']}",
         ]
     river_title = f"{config['river_name']}・{config['river_station_name']}"
-    draw_panel(card, (40, 248, 490, 112), river_title, river_lines, (80, 176, 218))
+    draw_panel(card, (40, 268, 490, 132), river_title, river_lines, (80, 176, 218))
 
     lightning = "雷注意報は発表なし" if "雷" not in warnings else "雷注意報 発表中"
-    draw_panel(card, (550, 248, 490, 112), "雷", [lightning], (239, 173, 80) if "雷" in warnings else (100, 198, 170))
+    draw_panel(card, (550, 268, 490, 132), "雷", [lightning], (239, 173, 80) if "雷" in warnings else (100, 198, 170))
 
     footer_font = pygame.font.Font(FONT_PATH, 16)
     sources = "気象庁（警報・地震）・国土交通省 川の防災情報（水位）"
