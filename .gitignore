@@ -12,6 +12,7 @@ weather-report/logs/
 weather-report/org_icons/
 weather-report/temp/
 weather-report/output/
+*.png
 
 # old file
 weather-report/old/
