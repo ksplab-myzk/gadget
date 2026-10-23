@@ -9,9 +9,15 @@ weather-report/logs/
 *.log
 
 # contents
+/temp/
+
 weather-report/org_icons/
 weather-report/temp/
+*.png
 weather-report/output/
 
 # old file
 weather-report/old/
+
+airquality/
+*.png
