@@ -132,8 +132,9 @@ def draw_card(config):
     title_font = pygame.font.Font(FONT_PATH, 34)
     meta_font = pygame.font.Font(FONT_PATH, 18)
     label_rect = pygame.Rect(66, 52, 152, 38)
-    pygame.draw.rect(card, (173, 61, 48), label_rect, border_radius=8)
-    card.blit(label_font.render("お知らせ", True, (255, 250, 238)), (label_rect.x + 18, label_rect.y + 5))
+    pygame.draw.rect(card, (35, 70, 112), label_rect, border_radius=8)
+    label_surface = label_font.render("お知らせ", True, (255, 250, 238))
+    card.blit(label_surface, label_surface.get_rect(center=label_rect.center))
 
     title = config["title"].strip()
     title_lines = _wrap_text(title, title_font, 780)
