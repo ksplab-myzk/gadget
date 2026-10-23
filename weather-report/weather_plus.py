@@ -7,7 +7,7 @@ from common.utils import safe_save, log, save_cached_uv, load_cached_uv, load_la
 import requests
 
 CARD_W = 1080
-CARD_H = 400
+CARD_H = 480
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -180,8 +180,8 @@ def draw_background(card):
     top = pygame.Color("#2A2E37")
     bottom = pygame.Color("#3A3F4A")
 
-    for y in range(400):
-        ratio = y / 400
+    for y in range(CARD_H):
+        ratio = y / CARD_H
         r = top.r + (bottom.r - top.r) * ratio
         g = top.g + (bottom.g - top.g) * ratio
         b = top.b + (bottom.b - top.b) * ratio
@@ -272,7 +272,11 @@ def draw_temp_precip_graph(card, hourly, pop_hourly):
     card.blit(graph, (0, 60))
 
 def draw_temp_precip_graph2(card, hourly, pop_hourly):
-    graph = pygame.Surface((1080, 260), pygame.SRCALPHA)
+    graph_height = CARD_H - 140
+    scale = graph_height / 260
+    baseline = int(240 * scale)
+    max_bar_height = int(190 * scale)
+    graph = pygame.Surface((1080, graph_height), pygame.SRCALPHA)
 
     # 気温の範囲
     temps = [h["temp"] for h in hourly]
@@ -289,15 +293,15 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
 
     for i, pop_val in enumerate(pop_hourly):
         pop = pop_val / 100
-        bar_h = int(pop * 190)
+        bar_h = int(pop * max_bar_height)
         x = int(i * step_x + step_x / 2 - 20)
 
         # 100%背景（薄いグレー）
-        bg_bar = pygame.Surface((40, 190), pygame.SRCALPHA)
+        bg_bar = pygame.Surface((40, max_bar_height), pygame.SRCALPHA)
         bg_bar.fill((180, 180, 180, 80))  # 薄いグレー＋半透明
-        graph.blit(bg_bar, (x, 240 - 190))
+        graph.blit(bg_bar, (x, baseline - max_bar_height))
 
-        y = 240 - bar_h
+        y = baseline - bar_h
 
         # グラデーションバー
         bar = pygame.Surface((40, bar_h), pygame.SRCALPHA)
@@ -316,7 +320,7 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
         graph.blit(highlight, (x, y))
 
         # バッジ位置（固定）
-        pop_y = 20
+        pop_y = int(20 * scale)
 
         # バッジ
         badge = pygame.Surface((60, 30), pygame.SRCALPHA)
@@ -338,7 +342,7 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
     for i, h in enumerate(hourly):
         x = int(i * step_x + step_x / 2)
         ratio = (h["temp"] - min_t) / (max_t - min_t)
-        y = int(240 - ratio * 200)
+        y = int(baseline - ratio * 200 * scale)
         points.append((x, y))
 
         # バッジ位置（折れ線の上に揃える）
@@ -387,7 +391,7 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
         t = h["time"].strftime("%H時")
         txt = font.render(t, True, (255,255,255))
         x = int(i * step_x + step_x / 2 - txt.get_width() / 2)
-        graph.blit(txt, (x, 230))
+        graph.blit(txt, (x, int(230 * scale)))
 
     card.blit(graph, (0, 60))
 
@@ -411,6 +415,7 @@ def draw_aqi_card(card, aqi_data):
     aqi = aqi_data["aqi"]
     pm25 = aqi_data["pm2_5"]
     pm10 = aqi_data["pm10"]
+    card_y = CARD_H - 80
 
     colors = {
         1: "#80E2E2",
@@ -422,10 +427,10 @@ def draw_aqi_card(card, aqi_data):
 
     bg = pygame.Surface((540, 130), pygame.SRCALPHA)
     # pygame.draw.rect(bg, pygame.Color(colors[aqi]), (0,0,540,180), border_radius=0)
-    draw_left_bottom_round_rect(card, (colors[aqi]),  (6,320,534,74), 25)
+    draw_left_bottom_round_rect(card, colors[aqi], (6, card_y, 534, 74), 25)
 
     bg.set_alpha(180)
-    card.blit(bg, (0, 320))
+    card.blit(bg, (0, card_y))
 
     font_big = pygame.font.Font(FONT_PATH, 28)
     font_small = pygame.font.Font(FONT_PATH, 24)
@@ -433,14 +438,15 @@ def draw_aqi_card(card, aqi_data):
     text_color = get_text_color(hex_to_rgb(colors[aqi]))
     txt = font_big.render(f"空気質指数：{aqi}", True, text_color)
  
-    card.blit(txt, (40, 320))
+    card.blit(txt, (40, card_y))
 
     pm_txt = font_small.render(f"PM2.5:{pm25:.1f} / PM10:{pm10:.1f}", True, text_color)
-    card.blit(pm_txt, (40, 355))
+    card.blit(pm_txt, (40, card_y + 35))
 
 
 def draw_uv_card(card, uv_data):
     uv = uv_data["uvi"]
+    card_y = CARD_H - 80
 
     if uv <= 2: color = "#54B3B8"
     elif uv <= 5: color = "#FFEB3B"
@@ -450,10 +456,10 @@ def draw_uv_card(card, uv_data):
 
     bg = pygame.Surface((540, 130), pygame.SRCALPHA)
     # pygame.draw.rect(bg, pygame.Color(color), (0,0,540,180), border_radius=0)
-    draw_right_bottom_round_rect(card, color,  (540,320,534,74), 25)
+    draw_right_bottom_round_rect(card, color, (540, card_y, 534, 74), 25)
 
     bg.set_alpha(180)
-    card.blit(bg, (540, 320))
+    card.blit(bg, (540, card_y))
 
     font_big = pygame.font.Font(FONT_PATH, 28)
     font_small = pygame.font.Font(FONT_PATH, 24)
@@ -461,7 +467,7 @@ def draw_uv_card(card, uv_data):
     text_color = get_text_color(hex_to_rgb(color))
 
     txt = font_big.render(f"紫外線指数(UV)：{uv:.1f}", True, text_color)
-    card.blit(txt, (580, 320))
+    card.blit(txt, (580, card_y))
 
     cat = (
         "弱い" if uv <= 2 else
@@ -472,7 +478,7 @@ def draw_uv_card(card, uv_data):
     )
 
     cat_txt = font_small.render(cat, True, text_color)
-    card.blit(cat_txt, (580, 355))
+    card.blit(cat_txt, (580, card_y + 35))
 
 def generate_weather_summary(data):
     pygame.init()

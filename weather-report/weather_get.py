@@ -17,7 +17,7 @@ FONT_PATH = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Regular.ttf")
 ICON_DIR = os.path.join(BASE_DIR, "icons")   # ← 240pxアイコン推奨
 
 CARD_W = 1080
-CARD_H = 400
+CARD_H = 480
 
 COLOR_MAP = {
     "Clear": ("#3FA9F5", "#6FC8FF"),
@@ -127,7 +127,7 @@ def generate_weather_image():
     if os.path.exists(icon_file):
         icon = pygame.image.load(icon_file)
         icon.set_alpha(250)
-        fg.blit(icon, (60, 80))
+        fg.blit(icon, (60, 120))
 
     # テキスト
     font_big = pygame.font.Font(FONT_PATH, 96)
@@ -142,9 +142,9 @@ def generate_weather_image():
     txt2.set_alpha(250)
     txt3.set_alpha(250)
 
-    fg.blit(txt1, (300, 30))
-    fg.blit(txt2, (300, 150))
-    fg.blit(txt3, (300, 240))
+    fg.blit(txt1, (300, 70))
+    fg.blit(txt2, (300, 190))
+    fg.blit(txt3, (300, 280))
 
     # --- 追加：情報時点と出典 ---
     font_info = pygame.font.Font(FONT_PATH, 32)
