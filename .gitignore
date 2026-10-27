@@ -13,12 +13,12 @@ weather-report/logs/
 
 weather-report/org_icons/
 weather-report/temp/
-*.png
 weather-report/output/
+airquality/
+
 *.png
 
 # old file
 weather-report/old/
 
-airquality/
-*.png
+notice_board/config.json
