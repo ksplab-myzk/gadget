@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0.."
-set "DEST_DIR=D:\Programming\digital-signage\imagesC\card"
+set "DEST_DIR=C:\School\01_Programming\digital-signage\imagesC\card"
 if not exist "logs" mkdir "logs"
 py -3 "weather_get.py" >> "logs\weather_get_task.log" 2>&1
 py -3 "weather_plus.py" >> "logs\weather_plus_task.log" 2>&1
