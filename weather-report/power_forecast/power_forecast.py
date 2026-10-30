@@ -137,8 +137,8 @@ def draw_text(surface, font, text, position, color=(240, 244, 248)):
 
 
 def draw_background(card):
-    top = pygame.Color("#172637")
-    bottom = pygame.Color("#263E4B")
+    top = pygame.Color("#354B62")
+    bottom = pygame.Color("#456477")
     for y in range(CARD_H):
         ratio = y / CARD_H
         color = tuple(
@@ -147,7 +147,7 @@ def draw_background(card):
         )
         pygame.draw.line(card, color, (0, y), (CARD_W, y))
     pygame.draw.rect(
-        card, (255, 255, 255, 100), (0, 0, CARD_W, CARD_H), width=4, border_radius=28
+        card, (255, 255, 255, 255), (0, 0, CARD_W, CARD_H), width=4, border_radius=28
     )
 
 
@@ -172,7 +172,7 @@ def draw_summary(card, current, peak):
         (792, "需給状況", status),
     ]
     for x, label, value in panels:
-        pygame.draw.rect(card, (7, 16, 25, 150), (x, 126, 220, 92), border_radius=14)
+        pygame.draw.rect(card, (32, 48, 62, 155), (x, 126, 220, 92), border_radius=14)
         draw_text(card, label_font, label, (x + 16, 140), (166, 183, 195))
         value_color = color if label == "需給状況" else (242, 247, 250)
         draw_text(card, value_font, value, (x + 16, 169), value_color)
@@ -195,13 +195,13 @@ def draw_environment(card, current, config, radiation):
         else f"空間線量: データなし ({config['radiation_station']})"
     )
     for x, text in ((42, co2_text), (542, radiation_text)):
-        pygame.draw.rect(card, (7, 16, 25, 150), (x, 234, 496, 34), border_radius=10)
+        pygame.draw.rect(card, (32, 48, 62, 155), (x, 234, 496, 34), border_radius=10)
         draw_text(card, font, text, (x + 16, 240), (202, 216, 222))
 
 
 def draw_graph(card, forecast):
     graph_x, graph_y, graph_w, graph_h = 42, 278, 996, 138
-    pygame.draw.rect(card, (7, 16, 25, 100), (graph_x, graph_y, graph_w, graph_h), border_radius=14)
+    pygame.draw.rect(card, (32, 48, 62, 110), (graph_x, graph_y, graph_w, graph_h), border_radius=14)
     maximum = max(item["supply"] for item in forecast) * 1.08
     points = []
     for index, item in enumerate(forecast):

@@ -1,0 +1,14 @@
+{
+    "window_hours": 24,
+    "minimum_flare_class": "C",
+    "few_max_count": 2,
+    "many_min_count": 8,
+    "descriptions": {
+        "few": "太陽は落ち着いています。\n通信・GPSへの影響はほとんどありません。",
+        "normal": "やや活発です。\n一時的に短波無線やGPSが乱れることがあります。日常生活への影響は基本的にありません。",
+        "many": "大きな太陽フレアが発生しました。\n無線通信の障害やGPSの誤差が出る可能性があります。数日後にオーロラが見られたり、まれに停電などが起きることもあります。最新の情報にご注意ください。"
+    },
+    "explanation": "太陽フレアの状態を観測しています。\n太陽フレアは、太陽表面で起きる大規模な爆発現象です。強いX線などが地球に届き、無線通信やGPSに一時的な影響が出ることがあります。人体への影響はありません。",
+    "output_path": "output/space_weather.png",
+    "temp_path": "temp/space_weather_temp.png"
+}

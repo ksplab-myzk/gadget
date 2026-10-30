@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('All', 'WeatherGet', 'WeatherPlus', 'CalendarSun', 'DisasterInfo', 'PowerForecast', 'NoticeBoard')]
+    [ValidateSet('All', 'WeatherGet', 'WeatherPlus', 'CalendarSun', 'DisasterInfo', 'PowerForecast', 'SpaceWeather', 'NoticeBoard')]
     [string]$Task = 'All'
 )
 
@@ -9,7 +9,25 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = $PSScriptRoot
 $logDirectory = Join-Path $projectRoot 'logs'
 $outputDirectory = Join-Path $projectRoot 'output'
-$destinationDirectory = 'C:\School\01_Programming\digital-signage\imagesC\card'
+$destinationDirectory = $null
+
+if ($Task -eq 'All') {
+    $envFilePath = Join-Path $projectRoot '.env'
+    if (-not (Test-Path -LiteralPath $envFilePath -PathType Leaf)) {
+        throw ".env was not found. Copy .env.example to .env and set DEST_DIR."
+    }
+
+    foreach ($line in Get-Content -LiteralPath $envFilePath) {
+        if ($line -match '^\s*DEST_DIR\s*=(.*)$') {
+            $destinationDirectory = $Matches[1].Trim()
+            break
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($destinationDirectory)) {
+        throw "DEST_DIR is not set in .env."
+    }
+}
 
 $tasks = [ordered]@{
     WeatherGet = [pscustomobject]@{
@@ -31,6 +49,10 @@ $tasks = [ordered]@{
     PowerForecast = [pscustomobject]@{
         Script = 'power_forecast\power_forecast.py'
         Log = 'power_forecast_task.log'
+    }
+    SpaceWeather = [pscustomobject]@{
+        Script = 'space_weather\space_weather.py'
+        Log = 'space_weather_task.log'
     }
     NoticeBoard = [pscustomobject]@{
         Script = 'notice_board\notice_board.py'
@@ -72,6 +94,7 @@ if ($Task -eq 'All') {
         'calendar_sun.png',
         'disaster_info.png',
         'power_forecast.png',
+        'space_weather.png',
         'notice_board.png'
     )
 

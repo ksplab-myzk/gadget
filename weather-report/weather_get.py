@@ -20,11 +20,11 @@ CARD_W = 1080
 CARD_H = 480
 
 COLOR_MAP = {
-    "Clear": ("#3FA9F5", "#6FC8FF"),
-    "Clouds": ("#9EA7B8", "#C3C8D0"),
-    "Rain": ("#4B6C8B", "#6A8AA5"),
-    "Drizzle": ("#6C8FA8", "#8AAAC0"),
-    "Thunderstorm": ("#3B3F5C", "#4C506F"),
+    "Clear": ("#72C5FF", "#9AE0FF"),
+    "Clouds": ("#C0CAD8", "#E0E5EC"),
+    "Rain": ("#7599BA", "#91B2CE"),
+    "Drizzle": ("#96BBD4", "#B2D0E2"),
+    "Thunderstorm": ("#626B8B", "#7883A1"),
     "Snow": ("#E3E7ED", "#FFFFFF"),
     "Fog": ("#C9D1D9", "#E2E6EA"),
     "Mist": ("#D5DCE2", "#E8EDF0"),
@@ -114,7 +114,7 @@ def generate_weather_image():
     # -------------------------
     border = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
     pygame.draw.rect(border, (255,255,255), (0,0,CARD_W,CARD_H), width=6, border_radius=32)
-    border.set_alpha(220)
+    border.set_alpha(255)
     card.blit(border, (0, 0))
 
     # -------------------------

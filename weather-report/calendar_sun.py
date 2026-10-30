@@ -106,8 +106,8 @@ def draw_sun_info(card, data, fonts):
     panel_y = 34
     panel_w = 310
     panel_h = 406
-    pygame.draw.rect(card, (24, 31, 49, 210), (panel_x, panel_y, panel_w, panel_h), border_radius=24)
-    pygame.draw.rect(card, (255, 255, 255, 80), (panel_x, panel_y, panel_w, panel_h), width=2, border_radius=24)
+    pygame.draw.rect(card, (54, 68, 91, 210), (panel_x, panel_y, panel_w, panel_h), border_radius=24)
+    pygame.draw.rect(card, (255, 255, 255, 255), (panel_x, panel_y, panel_w, panel_h), width=2, border_radius=24)
 
     draw_text(card, day_font, data["city"], (panel_x + 28, panel_y + 28))
     draw_text(card, small_font, data["date"].strftime("%Y/%m/%d (%a)"), (panel_x + 28, panel_y + 78), (205, 214, 228))
@@ -130,10 +130,10 @@ def draw_card(data):
     card = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
     for y in range(CARD_H):
         ratio = y / CARD_H
-        color = (int(21 + 12 * ratio), int(29 + 16 * ratio), int(49 + 24 * ratio))
+        color = (int(49 + 14 * ratio), int(62 + 18 * ratio), int(87 + 26 * ratio))
         pygame.draw.line(card, color, (0, y), (CARD_W, y))
 
-    pygame.draw.rect(card, (255, 255, 255, 100), (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
+    pygame.draw.rect(card, (255, 255, 255, 255), (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
     fonts = (
         pygame.font.Font(FONT_PATH, 42),
         pygame.font.Font(FONT_PATH, 28),

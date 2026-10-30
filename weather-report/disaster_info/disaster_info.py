@@ -109,7 +109,7 @@ def draw_text(surface, font, text, position, color=(238, 243, 247)):
 
 def draw_panel(card, rect, title, lines, accent):
     x, y, width, height = rect
-    pygame.draw.rect(card, (8, 20, 31, 210), rect, border_radius=16)
+    pygame.draw.rect(card, (34, 49, 63, 205), rect, border_radius=16)
     pygame.draw.rect(card, accent, (x, y, 7, height), border_radius=4)
     title_font = pygame.font.Font(FONT_PATH, 25)
     body_font = pygame.font.Font(FONT_PATH, 22)
@@ -123,9 +123,9 @@ def draw_card(config, warnings, quake, river, errors):
     card = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
     for y in range(CARD_H):
         ratio = y / CARD_H
-        color = (int(21 + 13 * ratio), int(31 + 20 * ratio), int(43 + 23 * ratio))
+        color = (int(48 + 15 * ratio), int(62 + 22 * ratio), int(76 + 25 * ratio))
         pygame.draw.line(card, color, (0, y), (CARD_W, y))
-    pygame.draw.rect(card, (255, 255, 255, 110), (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
+    pygame.draw.rect(card, (255, 255, 255, 255), (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
 
     title_font = pygame.font.Font(FONT_PATH, 42)
     small_font = pygame.font.Font(FONT_PATH, 19)

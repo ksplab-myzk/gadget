@@ -177,8 +177,8 @@ def draw_right_bottom_round_rect(surface, color, rect, radius):
 def draw_background(card):
     # 背景グラデーション
     bg = pygame.Surface((1080, CARD_H), pygame.SRCALPHA)
-    top = pygame.Color("#2A2E37")
-    bottom = pygame.Color("#3A3F4A")
+    top = pygame.Color("#596574")
+    bottom = pygame.Color("#6D7A89")
 
     for y in range(CARD_H):
         ratio = y / CARD_H
@@ -187,7 +187,7 @@ def draw_background(card):
         b = top.b + (bottom.b - top.b) * ratio
         pygame.draw.line(bg, (int(r), int(g), int(b)), (0, y), (1080, y))
 
-    bg.set_alpha(120)
+    bg.set_alpha(160)
     card.blit(bg, (0, 0))
 
     # 影
@@ -199,7 +199,7 @@ def draw_background(card):
     # 外枠
     border = pygame.Surface((1080, CARD_H), pygame.SRCALPHA)
     pygame.draw.rect(border, (255,255,255), (0,0,1080,CARD_H), width=6, border_radius=32)
-    border.set_alpha(220)
+    border.set_alpha(255)
     card.blit(border, (0, 0))
 
 def draw_header(card, timestamp):
