@@ -200,25 +200,37 @@ def draw_environment(card, current, config, radiation):
 
 
 def draw_graph(card, forecast):
-    graph_x, graph_y, graph_w, graph_h = 42, 278, 996, 138
+    graph_x, graph_y, graph_w, graph_h = 42, 278, 996, 158
     pygame.draw.rect(card, (32, 48, 62, 110), (graph_x, graph_y, graph_w, graph_h), border_radius=14)
     maximum = max(item["supply"] for item in forecast) * 1.08
-    points = []
+    demand_points = []
+    supply_points = []
     for index, item in enumerate(forecast):
         x = graph_x + 20 + int(index * (graph_w - 40) / max(len(forecast) - 1, 1))
-        y = graph_y + graph_h - 20 - int(item["demand"] / maximum * (graph_h - 42))
-        points.append((x, y))
-    for index in range(len(points) - 1):
-        pygame.draw.line(card, (91, 199, 211), points[index], points[index + 1], 4)
-    for index, point in enumerate(points):
+        baseline = graph_y + graph_h - 20
+        scale = graph_h - 42
+        demand_points.append((x, baseline - int(item["demand"] / maximum * scale)))
+        supply_points.append((x, baseline - int(item["supply"] / maximum * scale)))
+    for index in range(len(demand_points) - 1):
+        pygame.draw.line(card, (245, 177, 92), supply_points[index], supply_points[index + 1], 3)
+        pygame.draw.line(card, (91, 199, 211), demand_points[index], demand_points[index + 1], 4)
+    for point in supply_points:
+        pygame.draw.circle(card, (245, 177, 92), point, 4)
+    for index, point in enumerate(demand_points):
         pygame.draw.circle(card, (235, 247, 248), point, 5)
-        if index in (0, len(points) - 1) or index % 4 == 0:
+        if index in (0, len(demand_points) - 1) or index % 4 == 0:
             label = forecast[index]["time"].strftime("%H時")
             font = pygame.font.Font(FONT_PATH, 18)
             label_surface = font.render(label, True, (175, 193, 204))
-            card.blit(label_surface, (point[0] - label_surface.get_width() // 2, graph_y + graph_h - 18))
+            card.blit(label_surface, (point[0] - label_surface.get_width() // 2, graph_y + graph_h - 38))
     font = pygame.font.Font(FONT_PATH, 18)
     draw_text(card, font, "需要予想（1時間ごと）", (graph_x + 18, graph_y + 8), (175, 193, 204))
+    legend_font = pygame.font.Font(FONT_PATH, 16)
+    legend_y = graph_y + 17
+    pygame.draw.line(card, (91, 199, 211), (graph_x + 690, legend_y), (graph_x + 714, legend_y), 4)
+    draw_text(card, legend_font, "需要", (graph_x + 720, graph_y + 8), (202, 216, 222))
+    pygame.draw.line(card, (245, 177, 92), (graph_x + 790, legend_y), (graph_x + 814, legend_y), 4)
+    draw_text(card, legend_font, "供給力", (graph_x + 820, graph_y + 8), (202, 216, 222))
 
 
 def draw_card(config, forecast, radiation):

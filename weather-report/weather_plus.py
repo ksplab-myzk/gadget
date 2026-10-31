@@ -296,9 +296,9 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
         bar_h = int(pop * max_bar_height)
         x = int(i * step_x + step_x / 2 - 20)
 
-        # 100%背景（薄いグレー）
+        # 100%背景（濃い青）
         bg_bar = pygame.Surface((40, max_bar_height), pygame.SRCALPHA)
-        bg_bar.fill((180, 180, 180, 80))  # 薄いグレー＋半透明
+        bg_bar.fill((12, 36, 72, 180))
         graph.blit(bg_bar, (x, baseline - max_bar_height))
 
         y = baseline - bar_h
