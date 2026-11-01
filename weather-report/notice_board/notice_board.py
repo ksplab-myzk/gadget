@@ -128,17 +128,12 @@ def draw_card(config):
     pygame.draw.rect(card, (71, 49, 36), paper_rect.move(3, 5), border_radius=12)
     pygame.draw.rect(card, (250, 246, 229), paper_rect, border_radius=12)
 
-    label_font = pygame.font.Font(FONT_PATH, 22)
     title_font = pygame.font.Font(FONT_PATH, 34)
     meta_font = pygame.font.Font(FONT_PATH, 18)
-    label_rect = pygame.Rect(66, 52, 152, 38)
-    pygame.draw.rect(card, (35, 70, 112), label_rect, border_radius=8)
-    label_surface = label_font.render("お知らせ", True, (255, 250, 238))
-    card.blit(label_surface, label_surface.get_rect(center=label_rect.center))
 
     title = config["title"].strip()
     title_lines = _wrap_text(title, title_font, 780)
-    title_y = 101
+    title_y = 62
     for line in title_lines[:2]:
         card.blit(title_font.render(line, True, (58, 53, 45)), (68, title_y))
         title_y += title_font.get_linesize() + 2
@@ -148,7 +143,7 @@ def draw_card(config):
         posted_surface = meta_font.render(posted_at, True, (112, 104, 91))
         card.blit(posted_surface, (CARD_W - 68 - posted_surface.get_width(), 62))
 
-    divider_y = max(173, title_y + 4)
+    divider_y = max(125, title_y + 4)
     pygame.draw.line(card, (220, 210, 187), (68, divider_y), (CARD_W - 68, divider_y), 2)
 
     content_top = divider_y + 15
