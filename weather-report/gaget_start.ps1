@@ -95,7 +95,8 @@ if ($Task -eq 'All') {
         'disaster_info.png',
         'power_forecast.png',
         'space_weather.png',
-        'notice_board.png'
+        'notice_board.png',
+        'notice_board_light.png'
     )
 
     try {

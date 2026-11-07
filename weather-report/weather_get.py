@@ -10,6 +10,7 @@ from datetime import datetime
 # -----------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_PATH = os.path.join(BASE_DIR, "output", "weather.png")
+LIGHT_OUTPUT_PATH = os.path.join(BASE_DIR, "output", "weather_light.png")
 API_KEY = "9374cbd85e6aa5d3605d3e659ba39a28"
 CITY = "Kawasaki,jp"
 
@@ -61,16 +62,8 @@ def fetch_weather():
 # -----------------------------
 # 天気カード画像生成
 # -----------------------------
-def generate_weather_image():
-    pygame.init()
-
+def render_weather_image(data, output_path, light_mode=False):
     card = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
-
-    # API取得
-    data = fetch_weather()
-    if data is None:
-        print("[WARN] Using previous image due to API failure.")
-        return False
 
     # 天気情報抽出
     weather_main = data["weather"][0]["main"]
@@ -98,22 +91,26 @@ def generate_weather_image():
     mask = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
     pygame.draw.rect(mask, (255,255,255), (0,0,CARD_W,CARD_H), border_radius=32)
     bg.blit(mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
-    bg.set_alpha(120)
+    if light_mode:
+        pygame.draw.rect(card, (255,255,255), (0,0,CARD_W,CARD_H), border_radius=32)
+    bg.set_alpha(65 if light_mode else 120)
     card.blit(bg, (0, 0))
 
     # -------------------------
     # 影レイヤー（中透過）
     # -------------------------
     shadow = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
-    pygame.draw.rect(shadow, (0,0,0,80), (0,0,CARD_W,CARD_H), border_radius=32)
-    shadow.set_alpha(160)
+    shadow_color = (0,0,0,20) if light_mode else (0,0,0,80)
+    pygame.draw.rect(shadow, shadow_color, (0,0,CARD_W,CARD_H), border_radius=32)
+    shadow.set_alpha(80 if light_mode else 160)
     card.blit(shadow, (6, 6))
 
     # -------------------------
     # 外枠レイヤー
     # -------------------------
     border = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
-    pygame.draw.rect(border, (255,255,255), (0,0,CARD_W,CARD_H), width=6, border_radius=32)
+    border_color = (210,220,230) if light_mode else (255,255,255)
+    pygame.draw.rect(border, border_color, (0,0,CARD_W,CARD_H), width=6, border_radius=32)
     border.set_alpha(255)
     card.blit(border, (0, 0))
 
@@ -134,9 +131,10 @@ def generate_weather_image():
     font_mid = pygame.font.Font(FONT_PATH, 64)
     font_small = pygame.font.Font(FONT_PATH, 48)
 
-    txt1 = font_big.render(desc, True, (255,255,255))
-    txt2 = font_mid.render(f"気温 {temp:.1f}°C / 体感 {feels:.1f}°C", True, (255,255,255))
-    txt3 = font_small.render(f"湿度 {humidity}%   風 {wind}m/s", True, (255,255,255))
+    text_color = (40,52,66) if light_mode else (255,255,255)
+    txt1 = font_big.render(desc, True, text_color)
+    txt2 = font_mid.render(f"気温 {temp:.1f}°C / 体感 {feels:.1f}°C", True, text_color)
+    txt3 = font_small.render(f"湿度 {humidity}%   風 {wind}m/s", True, text_color)
 
     txt1.set_alpha(250)
     txt2.set_alpha(250)
@@ -150,8 +148,8 @@ def generate_weather_image():
     font_info = pygame.font.Font(FONT_PATH, 32)
     font_src  = pygame.font.Font(FONT_PATH, 24)
 
-    info_txt = font_info.render(dt_text, True, (255,255,255))
-    src_txt  = font_src.render("Provided by：OpenWeather", True, (255,255,255))
+    info_txt = font_info.render(dt_text, True, text_color)
+    src_txt  = font_src.render("Provided by：OpenWeather", True, text_color)
 
     info_txt.set_alpha(250)
     src_txt.set_alpha(250)
@@ -163,8 +161,21 @@ def generate_weather_image():
     card.blit(fg, (0, 0))
 
     # 保存
-    pygame.image.save(card, OUTPUT_PATH)
-    print(f"[OK] Weather image updated: {OUTPUT_PATH}")
+    pygame.image.save(card, output_path)
+    print(f"[OK] Weather image updated: {output_path}")
+
+
+def generate_weather_image():
+    pygame.init()
+
+    # API取得
+    data = fetch_weather()
+    if data is None:
+        print("[WARN] Using previous images due to API failure.")
+        return False
+
+    render_weather_image(data, OUTPUT_PATH)
+    render_weather_image(data, LIGHT_OUTPUT_PATH, light_mode=True)
     return True
 
 # -----------------------------

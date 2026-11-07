@@ -25,17 +25,31 @@ py -3 "notice_board\notice_board.py" >> "logs\notice_board_task.log" 2>&1
 if not exist "%DEST_DIR%" mkdir "%DEST_DIR%"
 copy /Y "output\weather.png" "%DEST_DIR%\weather.png" >nul
 if errorlevel 1 exit /b 1
+copy /Y "output\weather_light.png" "%DEST_DIR%\weather_light.png" >nul
+if errorlevel 1 exit /b 1
 copy /Y "output\airquality.png" "%DEST_DIR%\airquality.png" >nul
+if errorlevel 1 exit /b 1
+copy /Y "output\airquality_light.png" "%DEST_DIR%\airquality_light.png" >nul
 if errorlevel 1 exit /b 1
 copy /Y "output\calendar_sun.png" "%DEST_DIR%\calendar_sun.png" >nul
 if errorlevel 1 exit /b 1
+copy /Y "output\calendar_sun_light.png" "%DEST_DIR%\calendar_sun_light.png" >nul
+if errorlevel 1 exit /b 1
 copy /Y "output\disaster_info.png" "%DEST_DIR%\disaster_info.png" >nul
+if errorlevel 1 exit /b 1
+copy /Y "output\disaster_info_light.png" "%DEST_DIR%\disaster_info_light.png" >nul
 if errorlevel 1 exit /b 1
 copy /Y "output\power_forecast.png" "%DEST_DIR%\power_forecast.png" >nul
 if errorlevel 1 exit /b 1
+copy /Y "output\power_forecast_light.png" "%DEST_DIR%\power_forecast_light.png" >nul
+if errorlevel 1 exit /b 1
 copy /Y "output\space_weather.png" "%DEST_DIR%\space_weather.png" >nul
 if errorlevel 1 exit /b 1
+copy /Y "output\space_weather_light.png" "%DEST_DIR%\space_weather_light.png" >nul
+if errorlevel 1 exit /b 1
 copy /Y "output\notice_board.png" "%DEST_DIR%\notice_board.png" >nul
+if errorlevel 1 exit /b 1
+copy /Y "output\notice_board_light.png" "%DEST_DIR%\notice_board_light.png" >nul
 if errorlevel 1 exit /b 1
 
 exit /b %errorlevel%

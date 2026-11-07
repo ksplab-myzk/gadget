@@ -136,9 +136,9 @@ def draw_text(surface, font, text, position, color=(240, 244, 248)):
     surface.blit(font.render(text, True, color), position)
 
 
-def draw_background(card):
-    top = pygame.Color("#354B62")
-    bottom = pygame.Color("#456477")
+def draw_background(card, light_mode=False):
+    top = pygame.Color("#F3F7FA" if light_mode else "#354B62")
+    bottom = pygame.Color("#E2EBF1" if light_mode else "#456477")
     for y in range(CARD_H):
         ratio = y / CARD_H
         color = tuple(
@@ -146,22 +146,24 @@ def draw_background(card):
             for index in range(3)
         )
         pygame.draw.line(card, color, (0, y), (CARD_W, y))
-    pygame.draw.rect(
-        card, (255, 255, 255, 255), (0, 0, CARD_W, CARD_H), width=4, border_radius=28
-    )
+    border_color = (190, 205, 217, 255) if light_mode else (255, 255, 255, 255)
+    pygame.draw.rect(card, border_color, (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
 
 
-def draw_header(card, region, updated_at):
+def draw_header(card, region, updated_at, light_mode=False):
     title_font = pygame.font.Font(FONT_PATH, 42)
     small_font = pygame.font.Font(FONT_PATH, 22)
-    draw_text(card, title_font, "でんき予報", (42, 28))
-    draw_text(card, small_font, region, (42, 82), (164, 214, 222))
+    text_color = (43, 57, 71) if light_mode else (240, 244, 248)
+    region_color = (54, 118, 142) if light_mode else (164, 214, 222)
+    update_color = (91, 105, 118) if light_mode else (180, 193, 204)
+    draw_text(card, title_font, "でんき予報", (42, 28), text_color)
+    draw_text(card, small_font, region, (42, 82), region_color)
     updated = updated_at.strftime("%Y年%m月%d日 %H:%M 更新")
-    text = small_font.render(updated, True, (180, 193, 204))
+    text = small_font.render(updated, True, update_color)
     card.blit(text, (CARD_W - text.get_width() - 42, 42))
 
 
-def draw_summary(card, current, peak):
+def draw_summary(card, current, peak, light_mode=False):
     label_font = pygame.font.Font(FONT_PATH, 22)
     value_font = pygame.font.Font(FONT_PATH, 34)
     status, color = status_for(current["reserve_rate"])
@@ -172,20 +174,24 @@ def draw_summary(card, current, peak):
         (792, "需給状況", status),
     ]
     for x, label, value in panels:
-        pygame.draw.rect(card, (32, 48, 62, 155), (x, 126, 220, 92), border_radius=14)
-        draw_text(card, label_font, label, (x + 16, 140), (166, 183, 195))
-        value_color = color if label == "需給状況" else (242, 247, 250)
+        panel_color = (255, 255, 255, 220) if light_mode else (32, 48, 62, 155)
+        label_color = (91, 105, 118) if light_mode else (166, 183, 195)
+        value_default = (43, 57, 71) if light_mode else (242, 247, 250)
+        pygame.draw.rect(card, panel_color, (x, 126, 220, 92), border_radius=14)
+        draw_text(card, label_font, label, (x + 16, 140), label_color)
+        value_color = color if label == "需給状況" else value_default
         draw_text(card, value_font, value, (x + 16, 169), value_color)
 
+    peak_color = (69, 83, 97) if light_mode else (210, 220, 228)
     peak_text = label_font.render(
         f"本日の最大予想: {format_power(peak['demand'])}（{peak['time'].strftime('%H:%M')}）",
         True,
-        (210, 220, 228),
+        peak_color,
     )
     card.blit(peak_text, (42, 238))
 
 
-def draw_environment(card, current, config, radiation):
+def draw_environment(card, current, config, radiation, light_mode=False):
     font = pygame.font.Font(FONT_PATH, 20)
     co2_rate = estimate_co2_rate(current["demand"], config["co2_factor_kg_per_kwh"])
     co2_text = f"推定 CO2: {co2_rate:.0f} kg-CO2/時"
@@ -195,13 +201,16 @@ def draw_environment(card, current, config, radiation):
         else f"空間線量: データなし ({config['radiation_station']})"
     )
     for x, text in ((42, co2_text), (542, radiation_text)):
-        pygame.draw.rect(card, (32, 48, 62, 155), (x, 234, 496, 34), border_radius=10)
-        draw_text(card, font, text, (x + 16, 240), (202, 216, 222))
+        panel_color = (255, 255, 255, 210) if light_mode else (32, 48, 62, 155)
+        text_color = (69, 83, 97) if light_mode else (202, 216, 222)
+        pygame.draw.rect(card, panel_color, (x, 234, 496, 34), border_radius=10)
+        draw_text(card, font, text, (x + 16, 240), text_color)
 
 
-def draw_graph(card, forecast):
+def draw_graph(card, forecast, light_mode=False):
     graph_x, graph_y, graph_w, graph_h = 42, 278, 996, 158
-    pygame.draw.rect(card, (32, 48, 62, 110), (graph_x, graph_y, graph_w, graph_h), border_radius=14)
+    graph_color = (255, 255, 255, 210) if light_mode else (32, 48, 62, 110)
+    pygame.draw.rect(card, graph_color, (graph_x, graph_y, graph_w, graph_h), border_radius=14)
     maximum = max(item["supply"] for item in forecast) * 1.08
     demand_points = []
     supply_points = []
@@ -217,34 +226,39 @@ def draw_graph(card, forecast):
     for point in supply_points:
         pygame.draw.circle(card, (245, 177, 92), point, 4)
     for index, point in enumerate(demand_points):
-        pygame.draw.circle(card, (235, 247, 248), point, 5)
+        demand_point_color = (54, 116, 128) if light_mode else (235, 247, 248)
+        pygame.draw.circle(card, demand_point_color, point, 5)
         if index in (0, len(demand_points) - 1) or index % 4 == 0:
             label = forecast[index]["time"].strftime("%H時")
             font = pygame.font.Font(FONT_PATH, 18)
-            label_surface = font.render(label, True, (175, 193, 204))
+            label_color = (88, 102, 115) if light_mode else (175, 193, 204)
+            label_surface = font.render(label, True, label_color)
             card.blit(label_surface, (point[0] - label_surface.get_width() // 2, graph_y + graph_h - 38))
     font = pygame.font.Font(FONT_PATH, 18)
-    draw_text(card, font, "需要予想（1時間ごと）", (graph_x + 18, graph_y + 8), (175, 193, 204))
+    label_color = (88, 102, 115) if light_mode else (175, 193, 204)
+    legend_text_color = (69, 83, 97) if light_mode else (202, 216, 222)
+    draw_text(card, font, "需要予想（1時間ごと）", (graph_x + 18, graph_y + 8), label_color)
     legend_font = pygame.font.Font(FONT_PATH, 16)
     legend_y = graph_y + 17
     pygame.draw.line(card, (91, 199, 211), (graph_x + 690, legend_y), (graph_x + 714, legend_y), 4)
-    draw_text(card, legend_font, "需要", (graph_x + 720, graph_y + 8), (202, 216, 222))
+    draw_text(card, legend_font, "需要", (graph_x + 720, graph_y + 8), legend_text_color)
     pygame.draw.line(card, (245, 177, 92), (graph_x + 790, legend_y), (graph_x + 814, legend_y), 4)
-    draw_text(card, legend_font, "供給力", (graph_x + 820, graph_y + 8), (202, 216, 222))
+    draw_text(card, legend_font, "供給力", (graph_x + 820, graph_y + 8), legend_text_color)
 
 
-def draw_card(config, forecast, radiation):
+def draw_card(config, forecast, radiation, light_mode=False):
     pygame.init()
     card = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
-    draw_background(card)
-    draw_header(card, REGION_LABELS[config["region"]], datetime.now())
+    draw_background(card, light_mode=light_mode)
+    draw_header(card, REGION_LABELS[config["region"]], datetime.now(), light_mode=light_mode)
     current = choose_current(forecast)
     peak = max(forecast, key=lambda item: item["demand"])
-    draw_summary(card, current, peak)
-    draw_environment(card, current, config, radiation)
-    draw_graph(card, forecast)
+    draw_summary(card, current, peak, light_mode=light_mode)
+    draw_environment(card, current, config, radiation, light_mode=light_mode)
+    draw_graph(card, forecast, light_mode=light_mode)
     footer_font = pygame.font.Font(FONT_PATH, 16)
-    draw_text(card, footer_font, "Provided by：東京電力パワーグリッド（需給予報 CSV）", (42, 442), (145, 160, 172))
+    footer_color = (91, 105, 118) if light_mode else (145, 160, 172)
+    draw_text(card, footer_font, "Provided by：東京電力パワーグリッド（需給予報 CSV）", (42, 442), footer_color)
     return card
 
 
@@ -254,9 +268,19 @@ def main():
         forecast = fetch_forecast(config["region"])
         radiation = fetch_ramis_radiation(config["radiation_station_code"])
         card = draw_card(config, forecast, radiation)
-        saved = safe_save(card, config["temp_path"], config["output_path"])
+        light_card = draw_card(config, forecast, radiation, light_mode=True)
+        light_output_path = os.path.splitext(config["output_path"])[0] + "_light.png"
+        light_temp_path = os.path.splitext(config["temp_path"])[0] + "_light.png"
+        dark_saved = safe_save(card, config["temp_path"], config["output_path"])
+        light_saved = safe_save(light_card, light_temp_path, light_output_path)
+        saved = dark_saved and light_saved
         pygame.quit()
-        log("power_forecast", "OK: Updated" if saved else "WARN: Save failed")
+        log(
+            "power_forecast",
+            "OK: Updated dark and light images"
+            if saved
+            else "WARN: One or more image saves failed; previous outputs were retained",
+        )
         return saved
     except (OSError, KeyError, ValueError, requests.RequestException) as error:
         log("power_forecast", f"ERROR: {error}")

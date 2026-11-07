@@ -21,7 +21,7 @@ FONT_PATH = os.path.join(PROJECT_ROOT, "fonts", "NotoSansJP-Regular.ttf")
 ICON_DIR = os.path.join(PROJECT_ROOT, "icons")
 FLARE_IMAGES = {
     "few": "furea_low.png",
-    "normal": "furea_norm.png",
+    "normal": "furea_normal.png",
     "many": "furea_high.png",
 }
 FLARE_URL = "https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json"
@@ -136,11 +136,11 @@ def _wrap_text(text, font, max_width):
     return lines
 
 
-def draw_card(config, level, updated_at):
+def draw_card(config, level, updated_at, light_mode=False):
     pygame.init()
     card = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
-    top = pygame.Color("#493238")
-    bottom = pygame.Color("#5C3C42")
+    top = pygame.Color("#FFF7F2" if light_mode else "#493238")
+    bottom = pygame.Color("#F3E9E4" if light_mode else "#5C3C42")
     for y in range(CARD_H):
         ratio = y / CARD_H
         color = tuple(
@@ -149,25 +149,28 @@ def draw_card(config, level, updated_at):
         )
         pygame.draw.line(card, color, (0, y), (CARD_W, y))
 
-    white = (255, 255, 255)
-    pygame.draw.rect(card, (*white, 255), (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
+    text_color = (52, 48, 47) if light_mode else (255, 255, 255)
+    muted_text_color = (99, 91, 87) if light_mode else (225, 233, 239)
+    panel_color = (255, 255, 255) if light_mode else (48, 34, 37)
+    border_color = (218, 204, 196) if light_mode else (128, 128, 128)
+    pygame.draw.rect(card, (*text_color, 255), (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
     title_font = pygame.font.Font(FONT_PATH, 42)
     body_font = pygame.font.Font(FONT_PATH, 20)
     detail_font = pygame.font.Font(FONT_PATH, 22)
     state = LEVELS[level]
-    title = title_font.render("宇宙天気：今日の太陽活動状況", True, white)
+    title = title_font.render("宇宙天気：今日の太陽活動状況", True, text_color)
     card.blit(title, (42, 28))
 
     updated = detail_font.render(
         f"{updated_at.astimezone().strftime('%Y年%m月%d日 %H:%M')} 更新",
         True,
-        (225, 233, 239),
+        muted_text_color,
     )
     card.blit(updated, (CARD_W - updated.get_width() - 42, 44))
 
     inner_frame = pygame.Rect(42, 112, 996, 326)
-    pygame.draw.rect(card, (48, 34, 37), inner_frame, border_radius=18)
-    pygame.draw.rect(card, (128, 128, 128), inner_frame, width=2, border_radius=18)
+    pygame.draw.rect(card, panel_color, inner_frame, border_radius=18)
+    pygame.draw.rect(card, border_color, inner_frame, width=2, border_radius=18)
     flare_image = pygame.image.load(os.path.join(ICON_DIR, FLARE_IMAGES[level]))
     image_width, image_height = flare_image.get_size()
     scale = min(84 / image_width, 84 / image_height)
@@ -179,28 +182,29 @@ def draw_card(config, level, updated_at):
     state_surface = state_font.render(state["label"], True, state["color"])
     card.blit(state_surface, (172, 132))
 
-    heading = pygame.font.Font(FONT_PATH, 23).render("生活への影響", True, white)
+    heading = pygame.font.Font(FONT_PATH, 23).render("生活への影響", True, text_color)
     card.blit(heading, (70, 226))
     text_y = 258
     for line in config["descriptions"][level].splitlines():
         for wrapped in _wrap_text(line, body_font, 920):
-            text = body_font.render(wrapped, True, (238, 243, 247))
+            text = body_font.render(wrapped, True, (73, 68, 65) if light_mode else (238, 243, 247))
             card.blit(text, (93, text_y))
             text_y += 22
 
-    explanation_heading = pygame.font.Font(FONT_PATH, 20).render("宇宙天気とは", True, white)
+    explanation_heading = pygame.font.Font(FONT_PATH, 20).render("宇宙天気とは", True, text_color)
     explanation_heading_y = text_y + 26
     card.blit(explanation_heading, (70, explanation_heading_y))
     explanation_font = pygame.font.Font(FONT_PATH, 15)
     explanation_y = explanation_heading_y + 25
     for line in config["explanation"].splitlines():
         for wrapped in _wrap_text(line, explanation_font, 920):
-            text = explanation_font.render(wrapped, True, (238, 243, 247))
+            text = explanation_font.render(wrapped, True, (73, 68, 65) if light_mode else (238, 243, 247))
             card.blit(text, (93, explanation_y))
             explanation_y += 17
 
     source_font = pygame.font.Font(FONT_PATH, 16)
-    source = source_font.render("Data: NOAA SWPC GOES X-ray flare observations", True, (210, 221, 229))
+    source_color = (112, 103, 99) if light_mode else (210, 221, 229)
+    source = source_font.render("Data: NOAA SWPC GOES X-ray flare observations", True, source_color)
     card.blit(source, (70, 444))
     return card
 
@@ -218,9 +222,18 @@ def main(debug_level=None):
         )
         level = debug_level or classify_count(count, config)
         card = draw_card(config, level, now)
-        saved = safe_save(card, config["temp_path"], config["output_path"])
+        light_card = draw_card(config, level, now, light_mode=True)
+        light_output_path = os.path.splitext(config["output_path"])[0] + "_light.png"
+        light_temp_path = os.path.splitext(config["temp_path"])[0] + "_light.png"
+        dark_saved = safe_save(card, config["temp_path"], config["output_path"])
+        light_saved = safe_save(light_card, light_temp_path, light_output_path)
+        saved = dark_saved and light_saved
         pygame.quit()
-        status = "OK: Updated" if saved else "WARN: Save failed"
+        status = (
+            "OK: Updated dark and light images"
+            if saved
+            else "WARN: One or more image saves failed; previous outputs were retained"
+        )
         if debug_level:
             status = f"DEBUG ({debug_level}): {status}"
         log("space_weather", status)

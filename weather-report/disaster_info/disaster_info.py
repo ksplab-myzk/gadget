@@ -107,32 +107,41 @@ def draw_text(surface, font, text, position, color=(238, 243, 247)):
     surface.blit(font.render(text, True, color), position)
 
 
-def draw_panel(card, rect, title, lines, accent):
+def draw_panel(card, rect, title, lines, accent, light_mode=False):
     x, y, width, height = rect
-    pygame.draw.rect(card, (34, 49, 63, 205), rect, border_radius=16)
+    panel_color = (255, 255, 255, 225) if light_mode else (34, 49, 63, 205)
+    body_color = (51, 65, 78) if light_mode else (238, 243, 247)
+    pygame.draw.rect(card, panel_color, rect, border_radius=16)
     pygame.draw.rect(card, accent, (x, y, 7, height), border_radius=4)
     title_font = pygame.font.Font(FONT_PATH, 25)
     body_font = pygame.font.Font(FONT_PATH, 22)
     draw_text(card, title_font, title, (x + 22, y + 16), accent)
     for index, line in enumerate(lines):
-        draw_text(card, body_font, line, (x + 22, y + 54 + index * 32))
+        draw_text(card, body_font, line, (x + 22, y + 54 + index * 32), body_color)
 
 
-def draw_card(config, warnings, quake, river, errors):
+def draw_card(config, warnings, quake, river, errors, light_mode=False):
     pygame.init()
     card = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
     for y in range(CARD_H):
         ratio = y / CARD_H
-        color = (int(48 + 15 * ratio), int(62 + 22 * ratio), int(76 + 25 * ratio))
+        if light_mode:
+            color = (int(247 - 8 * ratio), int(249 - 7 * ratio), int(251 - 6 * ratio))
+        else:
+            color = (int(48 + 15 * ratio), int(62 + 22 * ratio), int(76 + 25 * ratio))
         pygame.draw.line(card, color, (0, y), (CARD_W, y))
-    pygame.draw.rect(card, (255, 255, 255, 255), (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
+    border_color = (190, 204, 216, 255) if light_mode else (255, 255, 255, 255)
+    pygame.draw.rect(card, border_color, (0, 0, CARD_W, CARD_H), width=4, border_radius=28)
 
     title_font = pygame.font.Font(FONT_PATH, 42)
     small_font = pygame.font.Font(FONT_PATH, 19)
-    draw_text(card, title_font, "災害情報", (40, 24))
-    draw_text(card, small_font, config["area_name"], (42, 78), (168, 211, 220))
+    title_color = (43, 57, 71) if light_mode else (238, 243, 247)
+    area_color = (54, 118, 142) if light_mode else (168, 211, 220)
+    update_color = (91, 105, 118) if light_mode else (180, 194, 204)
+    draw_text(card, title_font, "災害情報", (40, 24), title_color)
+    draw_text(card, small_font, config["area_name"], (42, 78), area_color)
     updated = datetime.now().strftime("%Y年%m月%d日 %H:%M 更新")
-    updated_surface = small_font.render(updated, True, (180, 194, 204))
+    updated_surface = small_font.render(updated, True, update_color)
     card.blit(updated_surface, (CARD_W - updated_surface.get_width() - 40, 42))
 
     if warnings:
@@ -142,13 +151,13 @@ def draw_card(config, warnings, quake, river, errors):
     else:
         warning_lines = ["警報・注意報発表なし"]
     warning_color = (239, 173, 80) if warnings or "警報" in errors else (100, 198, 170)
-    draw_panel(card, (40, 116, 490, 132), "気象警報・注意報", warning_lines, warning_color)
+    draw_panel(card, (40, 116, 490, 132), "気象警報・注意報", warning_lines, warning_color, light_mode)
 
     quake_lines = ["情報なし"] if not quake else [
         f"震源: {quake['area']}",
         f"M{quake['magnitude']} / 最大震度 {quake['max_intensity']} / {quake['time'][11:16]}",
     ]
-    draw_panel(card, (550, 116, 490, 132), "最新の地震", quake_lines, (236, 119, 108) if quake else (100, 198, 170))
+    draw_panel(card, (550, 116, 490, 132), "最新の地震", quake_lines, (236, 119, 108) if quake else (100, 198, 170), light_mode)
 
     if not river:
         river_lines = ["データなし"]
@@ -160,16 +169,18 @@ def draw_card(config, warnings, quake, river, errors):
             f"観測: {river['time']}",
         ]
     river_title = f"{config['river_name']}・{config['river_station_name']}"
-    draw_panel(card, (40, 268, 490, 132), river_title, river_lines, (80, 176, 218))
+    draw_panel(card, (40, 268, 490, 132), river_title, river_lines, (80, 176, 218), light_mode)
 
     lightning = "雷注意報は発表なし" if "雷" not in warnings else "雷注意報 発表中"
-    draw_panel(card, (550, 268, 490, 132), "雷", [lightning], (239, 173, 80) if "雷" in warnings else (100, 198, 170))
+    draw_panel(card, (550, 268, 490, 132), "雷", [lightning], (239, 173, 80) if "雷" in warnings else (100, 198, 170), light_mode)
 
     footer_font = pygame.font.Font(FONT_PATH, 16)
     sources = "気象庁（警報・地震）・国土交通省 川の防災情報（水位）"
-    draw_text(card, footer_font, sources, (40, 425), (150, 165, 177))
+    footer_color = (91, 105, 118) if light_mode else (150, 165, 177)
+    draw_text(card, footer_font, sources, (40, 425), footer_color)
     if errors:
-        draw_text(card, footer_font, "取得失敗: " + " / ".join(errors), (40, 450), (232, 151, 125))
+        error_color = (176, 85, 67) if light_mode else (232, 151, 125)
+        draw_text(card, footer_font, "取得失敗: " + " / ".join(errors), (40, 450), error_color)
     return card
 
 
@@ -194,9 +205,19 @@ def main():
         log("disaster_info", f"RIVER ERROR: {error}")
 
     card = draw_card(config, warnings, quake, river, errors)
-    saved = safe_save(card, config["temp_path"], config["output_path"])
+    light_card = draw_card(config, warnings, quake, river, errors, light_mode=True)
+    light_output_path = os.path.splitext(config["output_path"])[0] + "_light.png"
+    light_temp_path = os.path.splitext(config["temp_path"])[0] + "_light.png"
+    dark_saved = safe_save(card, config["temp_path"], config["output_path"])
+    light_saved = safe_save(light_card, light_temp_path, light_output_path)
+    saved = dark_saved and light_saved
     pygame.quit()
-    log("disaster_info", "OK: Updated" if saved else "WARN: Save failed")
+    log(
+        "disaster_info",
+        "OK: Updated dark and light images"
+        if saved
+        else "WARN: One or more image saves failed; previous outputs were retained",
+    )
     return saved
 
 

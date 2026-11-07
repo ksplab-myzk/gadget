@@ -111,45 +111,59 @@ def _markdown_lines(content):
     return rendered_lines
 
 
-def draw_card(config):
+def draw_card(config, dark_mode=False):
     pygame.init()
     card = pygame.Surface((CARD_W, CARD_H), pygame.SRCALPHA)
 
-    pygame.draw.rect(card, (73, 48, 35), (0, 0, CARD_W, CARD_H), border_radius=24)
-    pygame.draw.rect(card, (127, 82, 52), (15, 15, CARD_W - 30, CARD_H - 30), border_radius=18)
-    pygame.draw.rect(card, (178, 125, 76), (24, 24, CARD_W - 48, CARD_H - 48), border_radius=14)
+    if dark_mode:
+        frame_colors = ((24, 34, 47), (42, 57, 74), (62, 79, 98))
+        corner_colors = ((30, 43, 58), (111, 139, 165))
+        paper_shadow_color = (30, 40, 52)
+        paper_color = (36, 47, 60)
+        title_color = (236, 241, 246)
+        meta_color = (169, 184, 199)
+        divider_color = (81, 98, 116)
+        content_color = (220, 228, 236)
+    else:
+        frame_colors = ((73, 48, 35), (127, 82, 52), (178, 125, 76))
+        corner_colors = ((82, 55, 39), (218, 173, 119))
+        paper_shadow_color = (71, 49, 36)
+        paper_color = (250, 246, 229)
+        title_color = (58, 53, 45)
+        meta_color = (112, 104, 91)
+        divider_color = (220, 210, 187)
+        content_color = (67, 62, 53)
+
+    pygame.draw.rect(card, frame_colors[0], (0, 0, CARD_W, CARD_H), border_radius=24)
+    pygame.draw.rect(card, frame_colors[1], (15, 15, CARD_W - 30, CARD_H - 30), border_radius=18)
+    pygame.draw.rect(card, frame_colors[2], (24, 24, CARD_W - 48, CARD_H - 48), border_radius=14)
 
     for x in (42, CARD_W - 42):
         for y in (42, CARD_H - 42):
-            pygame.draw.circle(card, (82, 55, 39), (x, y), 7)
-            pygame.draw.circle(card, (218, 173, 119), (x - 2, y - 2), 2)
+            pygame.draw.circle(card, corner_colors[0], (x, y), 7)
+            pygame.draw.circle(card, corner_colors[1], (x - 2, y - 2), 2)
 
     paper_rect = pygame.Rect(42, 34, CARD_W - 84, CARD_H - 68)
-    pygame.draw.rect(card, (71, 49, 36), paper_rect.move(3, 5), border_radius=12)
-    pygame.draw.rect(card, (250, 246, 229), paper_rect, border_radius=12)
+    pygame.draw.rect(card, paper_shadow_color, paper_rect.move(3, 5), border_radius=12)
+    pygame.draw.rect(card, paper_color, paper_rect, border_radius=12)
 
-    label_font = pygame.font.Font(FONT_PATH, 22)
     title_font = pygame.font.Font(FONT_PATH, 34)
     meta_font = pygame.font.Font(FONT_PATH, 18)
-    label_rect = pygame.Rect(66, 52, 152, 38)
-    pygame.draw.rect(card, (35, 70, 112), label_rect, border_radius=8)
-    label_surface = label_font.render("お知らせ", True, (255, 250, 238))
-    card.blit(label_surface, label_surface.get_rect(center=label_rect.center))
 
     title = config["title"].strip()
     title_lines = _wrap_text(title, title_font, 780)
-    title_y = 101
+    title_y = 62
     for line in title_lines[:2]:
-        card.blit(title_font.render(line, True, (58, 53, 45)), (68, title_y))
+        card.blit(title_font.render(line, True, title_color), (68, title_y))
         title_y += title_font.get_linesize() + 2
 
     posted_at = config.get("posted_at", "").strip()
     if posted_at:
-        posted_surface = meta_font.render(posted_at, True, (112, 104, 91))
+        posted_surface = meta_font.render(posted_at, True, meta_color)
         card.blit(posted_surface, (CARD_W - 68 - posted_surface.get_width(), 62))
 
-    divider_y = max(173, title_y + 4)
-    pygame.draw.line(card, (220, 210, 187), (68, divider_y), (CARD_W - 68, divider_y), 2)
+    divider_y = max(125, title_y + 4)
+    pygame.draw.line(card, divider_color, (68, divider_y), (CARD_W - 68, divider_y), 2)
 
     content_top = divider_y + 15
     content_bottom = CARD_H - 62
@@ -164,10 +178,10 @@ def draw_card(config):
         line_height = max(font.get_linesize(), 24)
         if y + line_height > content_bottom:
             if index < len(content_lines):
-                omission = meta_font.render("…", True, (112, 104, 91))
+                omission = meta_font.render("…", True, meta_color)
                 card.blit(omission, (CARD_W - 92, content_bottom - omission.get_height()))
             break
-        card.blit(font.render(line, True, (67, 62, 53)), (76, y))
+        card.blit(font.render(line, True, content_color), (76, y))
         y += line_height + gap
     card.set_clip(previous_clip)
     return card
@@ -182,11 +196,21 @@ def main():
 
     try:
         card = draw_card(config)
-        saved = safe_save(card, config["temp_path"], config["output_path"])
+        dark_card = draw_card(config, dark_mode=True)
+        light_output_path = os.path.splitext(config["output_path"])[0] + "_light.png"
+        light_temp_path = os.path.splitext(config["temp_path"])[0] + "_light.png"
+        dark_saved = safe_save(dark_card, config["temp_path"], config["output_path"])
+        light_saved = safe_save(card, light_temp_path, light_output_path)
+        saved = dark_saved and light_saved
     finally:
         pygame.quit()
 
-    log("notice_board", "OK: Updated" if saved else "WARN: Save failed")
+    log(
+        "notice_board",
+        "OK: Updated light and dark images"
+        if saved
+        else "WARN: One or more image saves failed; previous outputs were retained",
+    )
     return saved
 
 

@@ -14,6 +14,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(BASE_DIR, "airquality", "config.json")
 OUTPUT_PATH = os.path.join(BASE_DIR, "output", "airquality.png")
 TEMP_PATH = os.path.join(BASE_DIR, "airquality", "airquality_temp.png")
+LIGHT_OUTPUT_PATH = os.path.join(BASE_DIR, "output", "airquality_light.png")
+LIGHT_TEMP_PATH = os.path.join(BASE_DIR, "airquality", "airquality_light_temp.png")
 FONT_PATH = os.path.join(BASE_DIR, "fonts", "NotoSansJP-Regular.ttf")
 
 def load_config():
@@ -174,11 +176,11 @@ def draw_right_bottom_round_rect(surface, color, rect, radius):
     # 右下の円弧（本物の丸角）
     pygame.draw.circle(surface, color, (x + w - radius, y + h - radius), radius)
 
-def draw_background(card):
+def draw_background(card, light_mode=False):
     # 背景グラデーション
     bg = pygame.Surface((1080, CARD_H), pygame.SRCALPHA)
-    top = pygame.Color("#596574")
-    bottom = pygame.Color("#6D7A89")
+    top = pygame.Color("#EAF1F6" if light_mode else "#596574")
+    bottom = pygame.Color("#D5E0E9" if light_mode else "#6D7A89")
 
     for y in range(CARD_H):
         ratio = y / CARD_H
@@ -187,35 +189,41 @@ def draw_background(card):
         b = top.b + (bottom.b - top.b) * ratio
         pygame.draw.line(bg, (int(r), int(g), int(b)), (0, y), (1080, y))
 
-    bg.set_alpha(160)
+    bg.set_alpha(255 if light_mode else 160)
     card.blit(bg, (0, 0))
 
     # 影
     shadow = pygame.Surface((1080, CARD_H), pygame.SRCALPHA)
-    pygame.draw.rect(shadow, (0,0,0,80), (0,0,1080,CARD_H), border_radius=32)
-    shadow.set_alpha(160)
+    shadow_color = (30, 45, 60, 16) if light_mode else (0, 0, 0, 80)
+    pygame.draw.rect(shadow, shadow_color, (0,0,1080,CARD_H), border_radius=32)
+    shadow.set_alpha(80 if light_mode else 160)
     card.blit(shadow, (6, 6))
 
     # 外枠
     border = pygame.Surface((1080, CARD_H), pygame.SRCALPHA)
-    pygame.draw.rect(border, (255,255,255), (0,0,1080,CARD_H), width=6, border_radius=32)
+    border_color = (185, 202, 216) if light_mode else (255, 255, 255)
+    pygame.draw.rect(border, border_color, (0,0,1080,CARD_H), width=6, border_radius=32)
     border.set_alpha(255)
     card.blit(border, (0, 0))
 
-def draw_header(card, timestamp):
+def draw_header(card, timestamp, light_mode=False):
     header = pygame.Surface((1080, 60), pygame.SRCALPHA)
-    pygame.draw.rect(header, (0,0,0,120), (0,0,1080,60), border_radius=16)
+    header_color = (255, 255, 255, 205) if light_mode else (0, 0, 0, 120)
+    text_color = (39, 54, 68) if light_mode else (255, 255, 255)
+    pygame.draw.rect(header, header_color, (0,0,1080,60), border_radius=16)
+    if light_mode:
+        card.blit(header, (0, 0))
 
     font = pygame.font.Font(FONT_PATH, 40)
-    title = font.render("気温・降水確率", True, (255,255,255))
+    title = font.render("気温・降水確率", True, text_color)
     card.blit(title, (40, 8))
 
     font = pygame.font.Font(FONT_PATH, 24)
     info = timestamp.strftime("%Y年%m月%d日 %H:%M 時点")
-    info_txt = font.render(info, True, (255,255,255))
+    info_txt = font.render(info, True, text_color)
     card.blit(info_txt, (1080 - info_txt.get_width() - 40, 8))
 
-    src = pygame.font.Font(FONT_PATH, 16).render("Provided by：OpenWeather・OpenUV・気象庁", True, (255,255,255))
+    src = pygame.font.Font(FONT_PATH, 16).render("Provided by：OpenWeather・OpenUV・気象庁", True, text_color)
     card.blit(src, (1080 - src.get_width() - 40, 45))
 
 def draw_temp_precip_graph(card, hourly, pop_hourly):
@@ -271,7 +279,7 @@ def draw_temp_precip_graph(card, hourly, pop_hourly):
 
     card.blit(graph, (0, 60))
 
-def draw_temp_precip_graph2(card, hourly, pop_hourly):
+def draw_temp_precip_graph2(card, hourly, pop_hourly, light_mode=False):
     graph_height = CARD_H - 140
     scale = graph_height / 260
     baseline = int(240 * scale)
@@ -285,6 +293,9 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
 
     step_x = 1080 / len(hourly)
     font_small = pygame.font.Font(FONT_PATH, 20)
+    label_color = (45, 59, 73) if light_mode else (255, 255, 255)
+    badge_color = (255, 255, 255, 210) if light_mode else (0, 0, 0, 120)
+    bar_bg_color = (100, 145, 180, 90) if light_mode else (12, 36, 72, 180)
 
     # -----------------------------
     # 1. 降水確率（棒グラフ）
@@ -298,7 +309,7 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
 
         # 100%背景（濃い青）
         bg_bar = pygame.Surface((40, max_bar_height), pygame.SRCALPHA)
-        bg_bar.fill((12, 36, 72, 180))
+        bg_bar.fill(bar_bg_color)
         graph.blit(bg_bar, (x, baseline - max_bar_height))
 
         y = baseline - bar_h
@@ -324,11 +335,11 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
 
         # バッジ
         badge = pygame.Surface((60, 30), pygame.SRCALPHA)
-        pygame.draw.rect(badge, (0, 0, 0, 120), (0, 0, 60, 30), border_radius=8)
+        pygame.draw.rect(badge, badge_color, (0, 0, 60, 30), border_radius=8)
         graph.blit(badge, (x - 10, pop_y))
 
         # テキスト
-        pop_text = font_small.render(f"{int(pop*100)}%", True, (255,255,255))
+        pop_text = font_small.render(f"{int(pop*100)}%", True, label_color)
         graph.blit(pop_text, (x , pop_y ))
 
         pop_positions.append((x, pop_y))
@@ -355,11 +366,11 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
 
         # バッジ
         badge = pygame.Surface((70, 30), pygame.SRCALPHA)
-        pygame.draw.rect(badge, (0, 0, 0, 120), (0, 0, 70, 30), border_radius=8)
+        pygame.draw.rect(badge, badge_color, (0, 0, 70, 30), border_radius=8)
         graph.blit(badge, (x - 35, temp_y + 5))
 
         # テキスト
-        temp_text = font_small.render(f"{h['temp']:.1f}°", True, (255,255,255))
+        temp_text = font_small.render(f"{h['temp']:.1f}°", True, label_color)
         graph.blit(temp_text, (x - 25, temp_y + 5))
 
         temp_positions.append((x, temp_y))
@@ -367,21 +378,28 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
     # -----------------------------
     # 3. 折れ線（グラデーション）
     # -----------------------------
+    line_colors = (
+        ((54, 116, 179), (80, 148, 193))
+        if light_mode
+        else ((255, 255, 255), (120, 180, 255))
+    )
     for i in range(len(points) - 1):
         x1, y1 = points[i]
         x2, y2 = points[i+1]
 
         for t in range(4):
             ratio = t / 4
-            r = 255 * (1 - ratio) + 120 * ratio
-            g = 255 * (1 - ratio) + 180 * ratio
-            b = 255 * (1 - ratio) + 255 * ratio
+            start_color, end_color = line_colors
+            r = start_color[0] * (1 - ratio) + end_color[0] * ratio
+            g = start_color[1] * (1 - ratio) + end_color[1] * ratio
+            b = start_color[2] * (1 - ratio) + end_color[2] * ratio
             pygame.draw.line(graph, (int(r), int(g), int(b)), (x1, y1), (x2, y2), 4 - t)
 
     # プロット点（影付き）
     for x, y in points:
-        pygame.draw.circle(graph, (0,0,0,120), (x+2, y+2), 10)
-        pygame.draw.circle(graph, (255,255,255), (x, y), 8)
+        point_color = (54, 116, 179) if light_mode else (255, 255, 255)
+        pygame.draw.circle(graph, (0,0,0,50 if light_mode else 120), (x+2, y+2), 10)
+        pygame.draw.circle(graph, point_color, (x, y), 8)
 
     # -----------------------------
     # 4. 時刻ラベル
@@ -389,7 +407,7 @@ def draw_temp_precip_graph2(card, hourly, pop_hourly):
     font = pygame.font.Font(FONT_PATH, 20)
     for i, h in enumerate(hourly):
         t = h["time"].strftime("%H時")
-        txt = font.render(t, True, (255,255,255))
+        txt = font.render(t, True, label_color)
         x = int(i * step_x + step_x / 2 - txt.get_width() / 2)
         graph.blit(txt, (x, int(230 * scale)))
 
@@ -480,13 +498,13 @@ def draw_uv_card(card, uv_data):
     cat_txt = font_small.render(cat, True, text_color)
     card.blit(cat_txt, (580, card_y + 35))
 
-def generate_weather_summary(data):
+def generate_weather_summary(data, light_mode=False):
     pygame.init()
     card = pygame.Surface((1080, CARD_H), pygame.SRCALPHA)
 
-    draw_background(card)
-    draw_header(card, data["timestamp"])
-    draw_temp_precip_graph2(card, data["hourly"], data["pop_hourly"])
+    draw_background(card, light_mode=light_mode)
+    draw_header(card, data["timestamp"], light_mode=light_mode)
+    draw_temp_precip_graph2(card, data["hourly"], data["pop_hourly"], light_mode=light_mode)
     draw_aqi_card(card, data["aqi"])
     draw_uv_card(card, data["uv"])
 
@@ -512,13 +530,15 @@ def main():
     save_last_uv_update(last_uv_update)
 
     card = generate_weather_summary(data)
-
-    ok = safe_save(card, TEMP_PATH, OUTPUT_PATH)
+    light_card = generate_weather_summary(data, light_mode=True)
+    dark_saved = safe_save(card, TEMP_PATH, OUTPUT_PATH)
+    light_saved = safe_save(light_card, LIGHT_TEMP_PATH, LIGHT_OUTPUT_PATH)
+    ok = dark_saved and light_saved
 
     if ok:
-        log("weather_summary", "OK: Updated")
+        log("weather_summary", "OK: Updated dark and light images")
     else:
-        log("weather_summary", "WARN: Using previous output")
+        log("weather_summary", "WARN: One or more image saves failed; previous outputs were retained")
 
     return ok
 
