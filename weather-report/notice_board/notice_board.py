@@ -162,8 +162,8 @@ def draw_card(config, dark_mode=False):
         posted_surface = meta_font.render(posted_at, True, meta_color)
         card.blit(posted_surface, (CARD_W - 68 - posted_surface.get_width(), 62))
 
-    divider_y = max(125, title_y + 4)
-    pygame.draw.line(card, divider_color, (68, divider_y), (CARD_W - 68, divider_y), 2)
+    divider_y = max(173, title_y + 4)
+    pygame.draw.line(card, (220, 210, 187), (68, divider_y), (CARD_W - 68, divider_y), 2)
 
     content_top = divider_y + 15
     content_bottom = CARD_H - 62
