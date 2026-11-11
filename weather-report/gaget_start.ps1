@@ -90,11 +90,17 @@ $copyFailed = $false
 if ($Task -eq 'All') {
     $outputFiles = @(
         'weather.png',
+        'weather_light.png',
         'airquality.png',
+        'airquality_light.png',
         'calendar_sun.png',
+        'calendar_sun_light.png',
         'disaster_info.png',
+        'disaster_info_light.png',
         'power_forecast.png',
+        'power_forecast_light.png',
         'space_weather.png',
+        'space_weather_light.png',
         'notice_board.png',
         'notice_board_light.png'
     )
