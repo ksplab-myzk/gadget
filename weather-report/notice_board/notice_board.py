@@ -65,11 +65,11 @@ def _wrap_text(text, font, max_width):
 
 
 def _markdown_lines(content):
-    body_font = pygame.font.Font(FONT_PATH, 22)
+    body_font = pygame.font.Font(FONT_PATH, 52)
     heading_fonts = {
-        1: pygame.font.Font(FONT_PATH, 29),
-        2: pygame.font.Font(FONT_PATH, 25),
-        3: pygame.font.Font(FONT_PATH, 22),
+        1: pygame.font.Font(FONT_PATH, 58),
+        2: pygame.font.Font(FONT_PATH, 50),
+        3: pygame.font.Font(FONT_PATH, 44),
     }
     rendered_lines = []
 
@@ -129,10 +129,10 @@ def draw_card(config, dark_mode=False):
         corner_colors = ((82, 55, 39), (218, 173, 119))
         paper_shadow_color = (71, 49, 36)
         paper_color = (250, 246, 229)
-        title_color = (58, 53, 45)
+        title_color = (39, 116, 170)
         meta_color = (112, 104, 91)
         divider_color = (220, 210, 187)
-        content_color = (67, 62, 53)
+        content_color = (45, 80, 112)
 
     pygame.draw.rect(card, frame_colors[0], (0, 0, CARD_W, CARD_H), border_radius=24)
     pygame.draw.rect(card, frame_colors[1], (15, 15, CARD_W - 30, CARD_H - 30), border_radius=18)
@@ -147,12 +147,12 @@ def draw_card(config, dark_mode=False):
     pygame.draw.rect(card, paper_shadow_color, paper_rect.move(3, 5), border_radius=12)
     pygame.draw.rect(card, paper_color, paper_rect, border_radius=12)
 
-    title_font = pygame.font.Font(FONT_PATH, 34)
-    meta_font = pygame.font.Font(FONT_PATH, 18)
+    title_font = pygame.font.Font(FONT_PATH, 68)
+    meta_font = pygame.font.Font(FONT_PATH, 36)
 
     title = config["title"].strip()
     title_lines = _wrap_text(title, title_font, 780)
-    title_y = 62
+    title_y = 42
     for line in title_lines[:2]:
         card.blit(title_font.render(line, True, title_color), (68, title_y))
         title_y += title_font.get_linesize() + 2
@@ -160,9 +160,9 @@ def draw_card(config, dark_mode=False):
     posted_at = config.get("posted_at", "").strip()
     if posted_at:
         posted_surface = meta_font.render(posted_at, True, meta_color)
-        card.blit(posted_surface, (CARD_W - 68 - posted_surface.get_width(), 62))
+        card.blit(posted_surface, (CARD_W - 68 - posted_surface.get_width(), 42))
 
-    divider_y = max(173, title_y + 4)
+    divider_y = max(132, title_y + 4)
     pygame.draw.line(card, (220, 210, 187), (68, divider_y), (CARD_W - 68, divider_y), 2)
 
     content_top = divider_y + 15
