@@ -83,7 +83,7 @@ def _markdown_lines(content):
             level = len(heading.group(1))
             rendered_lines.extend(
                 (heading_fonts[level], line, 5)
-                for line in _wrap_text(_plain_markdown(heading.group(2)), heading_fonts[level], 920)
+                for line in _wrap_text(_plain_markdown(heading.group(2)), heading_fonts[level], 960)
             )
             continue
 
@@ -105,7 +105,7 @@ def _markdown_lines(content):
 
         rendered_lines.extend(
             (body_font, line, 2)
-            for line in _wrap_text(text, body_font, 920 - indent)
+            for line in _wrap_text(text, body_font, 960 - indent)
         )
 
     return rendered_lines
@@ -135,15 +135,15 @@ def draw_card(config, dark_mode=False):
         content_color = (45, 80, 112)
 
     pygame.draw.rect(card, frame_colors[0], (0, 0, CARD_W, CARD_H), border_radius=24)
-    pygame.draw.rect(card, frame_colors[1], (15, 15, CARD_W - 30, CARD_H - 30), border_radius=18)
-    pygame.draw.rect(card, frame_colors[2], (24, 24, CARD_W - 48, CARD_H - 48), border_radius=14)
+    pygame.draw.rect(card, frame_colors[1], (6, 6, CARD_W - 12, CARD_H - 12), border_radius=18)
+    pygame.draw.rect(card, frame_colors[2], (12, 12, CARD_W - 24, CARD_H - 24), border_radius=14)
 
-    for x in (42, CARD_W - 42):
-        for y in (42, CARD_H - 42):
+    for x in (24, CARD_W - 24):
+        for y in (24, CARD_H - 24):
             pygame.draw.circle(card, corner_colors[0], (x, y), 7)
             pygame.draw.circle(card, corner_colors[1], (x - 2, y - 2), 2)
 
-    paper_rect = pygame.Rect(42, 34, CARD_W - 84, CARD_H - 68)
+    paper_rect = pygame.Rect(24, 24, CARD_W - 48, CARD_H - 48)
     pygame.draw.rect(card, paper_shadow_color, paper_rect.move(3, 5), border_radius=12)
     pygame.draw.rect(card, paper_color, paper_rect, border_radius=12)
 
@@ -151,24 +151,24 @@ def draw_card(config, dark_mode=False):
     meta_font = pygame.font.Font(FONT_PATH, 36)
 
     title = config["title"].strip()
-    title_lines = _wrap_text(title, title_font, 780)
+    title_lines = _wrap_text(title, title_font, 820)
     title_y = 42
     for line in title_lines[:2]:
-        card.blit(title_font.render(line, True, title_color), (68, title_y))
+        card.blit(title_font.render(line, True, title_color), (52, title_y))
         title_y += title_font.get_linesize() + 2
 
     posted_at = config.get("posted_at", "").strip()
     if posted_at:
         posted_surface = meta_font.render(posted_at, True, meta_color)
-        card.blit(posted_surface, (CARD_W - 68 - posted_surface.get_width(), 42))
+        card.blit(posted_surface, (CARD_W - 52 - posted_surface.get_width(), 42))
 
     divider_y = max(132, title_y + 4)
-    pygame.draw.line(card, (220, 210, 187), (68, divider_y), (CARD_W - 68, divider_y), 2)
+    pygame.draw.line(card, (220, 210, 187), (52, divider_y), (CARD_W - 52, divider_y), 2)
 
     content_top = divider_y + 15
     content_bottom = CARD_H - 62
     previous_clip = card.get_clip()
-    card.set_clip(pygame.Rect(68, content_top, CARD_W - 136, content_bottom - content_top))
+    card.set_clip(pygame.Rect(52, content_top, CARD_W - 104, content_bottom - content_top))
     y = content_top
     content_lines = _markdown_lines(config["content"])
     for index, (font, line, gap) in enumerate(content_lines):
@@ -179,9 +179,9 @@ def draw_card(config, dark_mode=False):
         if y + line_height > content_bottom:
             if index < len(content_lines):
                 omission = meta_font.render("…", True, meta_color)
-                card.blit(omission, (CARD_W - 92, content_bottom - omission.get_height()))
+                card.blit(omission, (CARD_W - 76, content_bottom - omission.get_height()))
             break
-        card.blit(font.render(line, True, content_color), (76, y))
+        card.blit(font.render(line, True, content_color), (60, y))
         y += line_height + gap
     card.set_clip(previous_clip)
     return card
